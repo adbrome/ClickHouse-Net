@@ -111,7 +111,7 @@ namespace ClickHouse.Ado
 
         public Guid GetGuid(int i)
         {
-            throw new NotSupportedException();
+            return ((GuidColumnType)_currentBlock.Columns[i].Type).Data[0];
         }
 
         public short GetInt16(int i)

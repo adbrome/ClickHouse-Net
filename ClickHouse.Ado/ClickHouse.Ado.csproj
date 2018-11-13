@@ -55,6 +55,8 @@
     <Compile Include="Impl\ATG\IdentList\Scanner.cs" />
     <Compile Include="Impl\ATG\Enums\Parser.cs" />
     <Compile Include="Impl\ATG\Enums\Scanner.cs" />
+    <Compile Include="Impl\ColumnTypes\GuidColumnType.cs" />
+    <Compile Include="Impl\Compress\ChunkedStream.cs" />
     <Compile Include="Impl\Data\Block.cs" />
     <Compile Include="Impl\Data\BlockInfo.cs" />
     <Compile Include="Impl\Settings\BoolSettingValue.cs" />
@@ -111,7 +113,6 @@
     <None Include="Impl\ATG\Enums\Enums.atg" />
     <None Include="Impl\ATG\Parser.frame" />
     <None Include="Impl\ATG\Scanner.frame" />
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
