@@ -136,6 +136,33 @@ namespace ClickHouse.Test
         }
 
         [TestMethod]
+        public void InsertIntArray()
+        {
+            using (var cnn = GetConnection())
+            {
+                // Create temp table
+                using (var cmd = cnn.CreateCommand("DROP TABLE IF EXISTS test_InsertIntArray"))
+                    cmd.ExecuteNonQuery();
+                using (var cmd = cnn.CreateCommand("CREATE TABLE IF NOT EXISTS test_InsertIntArray(date Date default today(), ints Array(integer)) ENGINE=MergeTree(date,(date), 8192)"))
+                    cmd.ExecuteNonQuery();
+                using (var cmd = cnn.CreateCommand("INSERT INTO test_InsertIntArray(ints) VALUES @bulk"))
+                {
+                    cmd.Parameters.Add(new ClickHouseParameter
+                    {
+                        DbType = DbType.Object,
+                        ParameterName = "bulk",
+                        Value = new[]
+                        {
+                            new object[] {new int[] {2, 4}},
+                            new object[] {new int[0]},
+                        }
+                    });
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        [TestMethod]
         public void TestPerfromance()
         {
             using (var cnn = GetConnection())
