@@ -209,5 +209,38 @@ namespace ClickHouse.Test
                 cnn.CreateCommand(sql).ExecuteNonQuery();
             }
         }
+
+        [TestMethod]
+        public void InsertSelectGuid()
+        {
+            var newGuid = Guid.NewGuid();
+            var dbGuid = Guid.NewGuid();
+            string dbGuidText = null;
+            using (var cnn = GetConnection())
+            {
+                // Create temp table
+                using (var cmd = cnn.CreateCommand("DROP TABLE IF EXISTS test_InsertSelectGuid"))
+                    cmd.ExecuteNonQuery();
+                using (var cmd = cnn.CreateCommand("CREATE TABLE IF NOT EXISTS test_InsertSelectGuid(date Date default today(), guid UUID) ENGINE=MergeTree(date,(date), 8192)"))
+                    cmd.ExecuteNonQuery();
+                // Process
+                using (var cmd = cnn.CreateCommand("INSERT INTO test_InsertSelectGuid(guid) VALUES(@guid)"))
+                {
+                    cmd.Parameters.Add(new ClickHouseParameter
+                    {
+                        DbType = DbType.Guid,
+                        ParameterName = "guid",
+                        Value = newGuid
+                    });
+                    cmd.ExecuteNonQuery();
+                }
+                using (var cmd = cnn.CreateCommand("SELECT guid, toString(guid) as guid_text FROM test_InsertSelectGuid"))
+                using (var r = cmd.ExecuteReader())
+                    r.ReadAll(rr => { dbGuid = rr.GetGuid(0); dbGuidText = rr.GetString(1); });
+            }
+            // Asert
+            Assert.AreEqual(dbGuid.ToString(), dbGuidText, true, "Writed guid doesnt match saved.");
+            Assert.AreEqual(dbGuid.ToString(), newGuid.ToString(), true, "Writed guid doesnt match read.");
+        }
     }
 }
