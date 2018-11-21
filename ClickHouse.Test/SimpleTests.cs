@@ -186,7 +186,7 @@ namespace ClickHouse.Test
         [TestMethod]
         public void InsertSelectGuid()
         {
-            var newGuid = Guid.Parse( "c77a98f1-087b-4942-b9f4-2d7df360f01c");// Guid.NewGuid();
+            var newGuid = Guid.NewGuid();
             var dbGuid = Guid.NewGuid();
             string dbGuidText = null;
             using (var cnn = GetConnection())
@@ -218,7 +218,7 @@ namespace ClickHouse.Test
 
         public void InsertSelectGuidBulk()
         {
-            var newGuid1 = Guid.Parse("c77a98f1-087b-4942-b9f4-2d7df360f01c");// Guid.NewGuid();
+            var newGuid1 = Guid.NewGuid();
             var newGuid2 = Guid.NewGuid();
             var dbGuid = Guid.NewGuid();
             var l1 = new List<Guid>();
