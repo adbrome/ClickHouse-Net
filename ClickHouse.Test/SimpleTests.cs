@@ -186,7 +186,7 @@ namespace ClickHouse.Test
         [TestMethod]
         public void InsertSelectGuid()
         {
-            var newGuid = Guid.NewGuid();
+            var newGuid = Guid.Parse( "c77a98f1-087b-4942-b9f4-2d7df360f01c");// Guid.NewGuid();
             var dbGuid = Guid.NewGuid();
             string dbGuidText = null;
             using (var cnn = GetConnection())
@@ -214,6 +214,54 @@ namespace ClickHouse.Test
             // Asert
             Assert.AreEqual(dbGuid.ToString(), dbGuidText, true, "Writed guid doesnt match saved.");
             Assert.AreEqual(dbGuid.ToString(), newGuid.ToString(), true, "Writed guid doesnt match read.");
+        }
+
+        public void InsertSelectGuidBulk()
+        {
+            var newGuid1 = Guid.Parse("c77a98f1-087b-4942-b9f4-2d7df360f01c");// Guid.NewGuid();
+            var newGuid2 = Guid.NewGuid();
+            var dbGuid = Guid.NewGuid();
+            var l1 = new List<Guid>();
+            var l2 = new List<String>();
+
+            string dbGuidText = null;
+            using (var cnn = GetConnection())
+            {
+                // Create temp table
+                using (var cmd = cnn.CreateCommand("DROP TABLE IF EXISTS test_InsertSelectGuid"))
+                    cmd.ExecuteNonQuery();
+                using (var cmd = cnn.CreateCommand("CREATE TABLE IF NOT EXISTS test_InsertSelectGuid(date Date default today(), guid UUID) ENGINE=MergeTree(date,(date), 8192)"))
+                    cmd.ExecuteNonQuery();
+                // Process
+                using (var cmd = cnn.CreateCommand("INSERT INTO test_InsertSelectGuid (guid) VALUES @bulk"))
+                {
+                    cmd.Parameters.Add(new ClickHouseParameter
+                    {
+                        DbType = DbType.Object,
+                        ParameterName = "bulk",
+                        Value = new[]
+                        {
+                            new object[] {newGuid1},
+                            new object[] {newGuid2},
+                        }
+                    });
+                    cmd.ExecuteNonQuery();
+                }
+
+                using (var cmd = cnn.CreateCommand("SELECT guid, toString(guid) as guid_text FROM test_InsertSelectGuid"))
+                using (var r = cmd.ExecuteReader())
+                    r.ReadAll(rr => { l1.Add(rr.GetGuid(0)); l2.Add(rr.GetString(1)); });
+            }
+
+            // Asert
+            Assert.IsTrue(l1.Count == 1, "Wrong count read.");
+
+            Assert.IsTrue(l1.Any(t => t == newGuid1), "Writed guid1 doesnt match saved.");
+            Assert.IsTrue(l1.Any(t => t == newGuid2), "Writed guid2 doesnt match saved.");
+
+            Assert.IsTrue(l2.Any(t => t == newGuid1.ToString()), "Writed guid1 doesnt match read.");
+            Assert.IsTrue(l2.Any(t => t == newGuid2.ToString()), "Writed guid2 doesnt match read.");
+
         }
     }
 }

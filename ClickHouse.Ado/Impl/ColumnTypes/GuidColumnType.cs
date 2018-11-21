@@ -124,7 +124,7 @@ namespace ClickHouse.Ado.Impl.ColumnTypes
             arr[1] = arr[5];
             arr[5] = arr[3];
             arr[3] = arr[7];
-            arr[7] = arr[1];
+            arr[7] = i;
 
             SwapBytes(arr);
 
@@ -137,22 +137,22 @@ namespace ClickHouse.Ado.Impl.ColumnTypes
             i = arr[8];
 
             arr[8] = arr[15];
-            arr[15] = arr[8];
+            arr[15] = i;
 
             i = arr[9];
 
             arr[9] = arr[14];
-            arr[14] = arr[9];
+            arr[14] = i;
 
             i = arr[10];
 
             arr[10] = arr[13];
-            arr[13] = arr[10];
+            arr[13] = i;
 
             i = arr[12];
 
-            arr[11] = arr[12];
             arr[12] = arr[11];
+            arr[11] = i;
         }
     }
 }
