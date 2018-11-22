@@ -224,7 +224,6 @@ namespace ClickHouse.Test
             var l1 = new List<Guid>();
             var l2 = new List<String>();
 
-            string dbGuidText = null;
             using (var cnn = GetConnection())
             {
                 // Create temp table
@@ -254,14 +253,13 @@ namespace ClickHouse.Test
             }
 
             // Asert
-            Assert.IsTrue(l1.Count == 1, "Wrong count read.");
+            Assert.IsTrue(l1.Count == 2, "Wrong count read.");
 
-            Assert.IsTrue(l1.Any(t => t == newGuid1), "Writed guid1 doesnt match saved.");
-            Assert.IsTrue(l1.Any(t => t == newGuid2), "Writed guid2 doesnt match saved.");
+            Assert.IsTrue(l1.Any(t => t == newGuid1), "Written guid1 doesnt match saved.");
+            Assert.IsTrue(l1.Any(t => t == newGuid2), "Written guid2 doesnt match saved.");
 
-            Assert.IsTrue(l2.Any(t => t == newGuid1.ToString()), "Writed guid1 doesnt match read.");
-            Assert.IsTrue(l2.Any(t => t == newGuid2.ToString()), "Writed guid2 doesnt match read.");
-
+            Assert.IsTrue(l2.Any(t => t == newGuid1.ToString()), "Written guid1 doesnt match read.");
+            Assert.IsTrue(l2.Any(t => t == newGuid2.ToString()), "Written guid2 doesnt match read.");
         }
     }
 }
