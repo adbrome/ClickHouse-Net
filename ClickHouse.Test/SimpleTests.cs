@@ -242,5 +242,51 @@ namespace ClickHouse.Test
             Assert.AreEqual(dbGuid.ToString(), dbGuidText, true, "Writed guid doesnt match saved.");
             Assert.AreEqual(dbGuid.ToString(), newGuid.ToString(), true, "Writed guid doesnt match read.");
         }
+
+        public void InsertSelectGuidBulk()
+        {
+            var newGuid1 = Guid.NewGuid();
+            var newGuid2 = Guid.NewGuid();
+            var dbGuid = Guid.NewGuid();
+            var l1 = new List<Guid>();
+            var l2 = new List<String>();
+
+            using (var cnn = GetConnection())
+            {
+                // Create temp table
+                using (var cmd = cnn.CreateCommand("DROP TABLE IF EXISTS test_InsertSelectGuid"))
+                    cmd.ExecuteNonQuery();
+                using (var cmd = cnn.CreateCommand("CREATE TABLE IF NOT EXISTS test_InsertSelectGuid(date Date default today(), guid UUID) ENGINE=MergeTree(date,(date), 8192)"))
+                    cmd.ExecuteNonQuery();
+                // Process
+                using (var cmd = cnn.CreateCommand("INSERT INTO test_InsertSelectGuid (guid) VALUES @bulk"))
+                {
+                    cmd.Parameters.Add(new ClickHouseParameter
+                    {
+                        DbType = DbType.Object,
+                        ParameterName = "bulk",
+                        Value = new[]
+                        {
+                            new object[] {newGuid1},
+                            new object[] {newGuid2},
+                        }
+                    });
+                    cmd.ExecuteNonQuery();
+                }
+
+                using (var cmd = cnn.CreateCommand("SELECT guid, toString(guid) as guid_text FROM test_InsertSelectGuid"))
+                using (var r = cmd.ExecuteReader())
+                    r.ReadAll(rr => { l1.Add(rr.GetGuid(0)); l2.Add(rr.GetString(1)); });
+            }
+
+            // Asert
+            Assert.IsTrue(l1.Count == 2, "Wrong count read.");
+
+            Assert.IsTrue(l1.Any(t => t == newGuid1), "Written guid1 doesnt match saved.");
+            Assert.IsTrue(l1.Any(t => t == newGuid2), "Written guid2 doesnt match saved.");
+
+            Assert.IsTrue(l2.Any(t => t == newGuid1.ToString()), "Written guid1 doesnt match read.");
+            Assert.IsTrue(l2.Any(t => t == newGuid2.ToString()), "Written guid2 doesnt match read.");
+        }
     }
 }
